@@ -1,0 +1,138 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.title {
+  font-size: 1.6rem;
+  color: var(--color-primary);
+}
+
+.subtitle {
+  color: var(--color-text-muted);
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.primaryBtn {
+  background: var(--color-primary);
+  color: white;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.primaryBtn:hover:not(:disabled) {
+  background: var(--color-primary-hover);
+}
+
+.primaryBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.formTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 1.25rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 1rem;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.field label {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--color-text-muted);
+}
+
+.field input,
+.field select {
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.75rem;
+  background: white;
+  color: var(--color-text);
+  transition: border-color 0.15s;
+}
+
+.field input:focus,
+.field select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.1);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tableCard {
+  padding: 0;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.table th {
+  text-align: left;
+  padding: 0.8rem 1.25rem;
+  font-size: 0.77rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--color-bg);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.table td {
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: middle;
+}
+
+.table tr:last-child td {
+  border-bottom: none;
+}
+
+.table tr:hover td {
+  background: var(--color-bg);
+}
+
+.farmName {
+  font-weight: 600;
+}
+
+.coords {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}

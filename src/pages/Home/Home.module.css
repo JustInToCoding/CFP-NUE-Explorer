@@ -1,0 +1,129 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.header {
+  padding: 0.5rem 0;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: 0.5rem;
+}
+
+.subtitle {
+  font-size: 1rem;
+  color: var(--color-text-muted);
+  max-width: 52rem;
+  line-height: 1.6;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.featureLink {
+  text-decoration: none;
+}
+
+.featureCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  transition: box-shadow 0.2s, transform 0.2s;
+  cursor: pointer;
+  border-top: 3px solid transparent;
+}
+
+.featureCard:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-2px);
+  text-decoration: none;
+}
+
+.accentGreen {
+  border-top-color: var(--color-primary);
+}
+
+.accentTeal {
+  border-top-color: #0d7680;
+}
+
+.accentPurple {
+  border-top-color: var(--color-n2o);
+}
+
+.featureIcon {
+  font-size: 2rem;
+  line-height: 1;
+  margin-bottom: 0.25rem;
+}
+
+.featureTitle {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.featureDesc {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  flex: 1;
+  line-height: 1.55;
+}
+
+.arrow {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+.infoCard {
+  background: linear-gradient(135deg, #f0f9f2 0%, #edf4fd 100%);
+  border-color: var(--color-primary-pale);
+}
+
+.infoTitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: 0.6rem;
+}
+
+.infoText {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  margin-bottom: 0.85rem;
+}
+
+.infoList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.infoList li {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  padding-left: 1.25rem;
+  position: relative;
+  line-height: 1.5;
+}
+
+.infoList li::before {
+  content: '—';
+  position: absolute;
+  left: 0;
+  color: var(--color-primary-light);
+  font-weight: 700;
+}

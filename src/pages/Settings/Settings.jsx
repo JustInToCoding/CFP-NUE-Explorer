@@ -44,7 +44,7 @@ export default function Settings({ onSave, isGate = false }) {
         {isGate && (
           <div className={styles.brand}>
             <span className={styles.brandIcon}>🌱</span>
-            <h1 className={styles.brandName}>CFP NUE Explorer</h1>
+            <h1 className={styles.brandName}>Cool Farm Platform NUE Explorer</h1>
           </div>
         )}
 

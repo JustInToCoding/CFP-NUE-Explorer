@@ -82,6 +82,202 @@
   border-left: 3px solid var(--color-primary);
 }
 
+.summaryHint {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: 0;
+  line-height: 1.3;
+}
+
+/* Field context bar */
+.fieldBar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.85rem 1.1rem;
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
+  border-radius: calc(var(--radius) * 2);
+}
+
+.fieldChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 99px;
+  padding: 0.3rem 0.75rem;
+  font-size: 0.88rem;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.fieldChipIcon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.fieldChipText {
+  font-weight: 500;
+}
+
+/* Emission intensity card */
+.intensityStats {
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 640px) {
+  .intensityStats {
+    grid-template-columns: 1fr;
+  }
+}
+
+.intensityStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.85rem 1.25rem;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+}
+
+.intensityValue {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.1;
+}
+
+.intensityUnit {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.intensityLabel {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-top: 0.15rem;
+}
+
+.intensityRating {
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  justify-content: center;
+}
+
+.intensityRatingLabel {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.intensityRatingDesc {
+  font-size: 0.82rem;
+  color: var(--color-text);
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Benchmark scale bar */
+.benchScale {
+  border-top: 1px solid var(--color-border);
+  padding-top: 1.1rem;
+}
+
+.benchScaleTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 0.75rem;
+}
+
+.benchBar {
+  position: relative;
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(to right, #86efac 0%, #fde68a 40%, #fca5a5 75%, #f87171 100%);
+  margin-bottom: 0.4rem;
+}
+
+.benchMarkerGood,
+.benchMarkerPoor {
+  position: absolute;
+  top: -3px;
+  width: 1px;
+  height: 20px;
+  background: rgba(0,0,0,0.25);
+}
+
+.benchMarker {
+  position: absolute;
+  top: -10px;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.benchMarkerDot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: white;
+  border: 3px solid;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  margin-top: 4px;
+}
+
+.benchMarkerVal {
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  margin-top: 6px;
+  background: white;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+.benchLabels {
+  position: relative;
+  height: 2rem;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.benchNote {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  margin: 0.5rem 0 0;
+  font-style: italic;
+}
+
+.sinkNote {
+  font-size: 0.875rem;
+  color: #15803d;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  margin: 0;
+}
+
 .sectionTitle {
   font-size: 0.95rem;
   font-weight: 600;
@@ -389,4 +585,61 @@
   overflow-y: auto;
   color: var(--color-text);
   font-family: 'Courier New', monospace;
+}
+
+/* ── Chatbot banner ── */
+.chatbotBanner {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+  border: 1.5px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: calc(var(--radius) * 2);
+  padding: 1.25rem 1.5rem;
+}
+
+.chatbotIcon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.chatbotBody {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.chatbotTitle {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.chatbotDesc {
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.chatbotBtn {
+  display: inline-block;
+  white-space: nowrap;
+  background: var(--color-primary);
+  color: white;
+  font-size: 0.875rem;
+  font-weight: 600;
+  padding: 0.6rem 1.25rem;
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.chatbotBtn:hover {
+  opacity: 0.88;
+  text-decoration: none;
 }

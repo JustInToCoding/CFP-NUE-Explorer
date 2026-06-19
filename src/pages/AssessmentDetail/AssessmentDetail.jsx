@@ -12,6 +12,67 @@ import styles from './AssessmentDetail.module.css'
 
 const fmt = (n) => (n != null ? Number(n).toFixed(3) : '—')
 const fmtN = (n) => (n != null ? n.toFixed(1) : '—')
+const fmtInt = (n) => (n != null ? Math.round(n).toLocaleString() : '—')
+
+// kg CO₂eq per tonne of product — farm-gate, indicative ranges (Poore & Nemecek 2018 / Our World in Data)
+// [good, poor]: below good = low intensity, above poor = high intensity
+const INTENSITY_BENCHMARKS = {
+  wheat: { good: 500, poor: 1200 }, 'winter wheat': { good: 500, poor: 1200 },
+  'spring wheat': { good: 500, poor: 1200 }, barley: { good: 450, poor: 1000 },
+  maize: { good: 400, poor: 900 }, corn: { good: 400, poor: 900 },
+  rice: { good: 1500, poor: 4000 },
+  soybean: { good: 350, poor: 850 }, soya: { good: 350, poor: 850 },
+  rapeseed: { good: 500, poor: 1200 }, canola: { good: 500, poor: 1200 },
+  sunflower: { good: 450, poor: 1100 },
+  potato: { good: 180, poor: 450 }, potatoes: { good: 180, poor: 450 },
+  'sugar beet': { good: 120, poor: 320 }, sugarcane: { good: 100, poor: 350 },
+  pea: { good: 300, poor: 750 }, peas: { good: 300, poor: 750 },
+  bean: { good: 300, poor: 800 }, beans: { good: 300, poor: 800 },
+  lentil: { good: 280, poor: 700 }, lentils: { good: 280, poor: 700 },
+  coffee: { good: 3000, poor: 8000 },
+  _default: { good: 500, poor: 1200 },
+}
+
+const getEmissionRating = (balancePerTonne, cropKey) => {
+  if (balancePerTonne == null) return null
+  if (balancePerTonne < 0) return {
+    label: 'Net Carbon Sink', color: '#15803d', bg: '#f0fdf4',
+    desc: 'This field sequesters more carbon than it emits — a net positive climate outcome.',
+    tier: -1,
+  }
+  const bench = (cropKey && INTENSITY_BENCHMARKS[cropKey]) ?? INTENSITY_BENCHMARKS._default
+  if (balancePerTonne < bench.good) return {
+    label: 'Low Emission Intensity', color: '#16a34a', bg: '#f0fdf4',
+    desc: `Below ${bench.good.toLocaleString()} kg CO₂eq/t — better than the typical range for this crop.`,
+    bench, tier: 0,
+  }
+  if (balancePerTonne < bench.poor) return {
+    label: 'Average Emission Intensity', color: '#d97706', bg: '#fffbeb',
+    desc: `Within the typical range of ${bench.good.toLocaleString()}–${bench.poor.toLocaleString()} kg CO₂eq/t for this crop type.`,
+    bench, tier: 1,
+  }
+  return {
+    label: 'High Emission Intensity', color: '#dc2626', bg: '#fff1f2',
+    desc: `Above ${bench.poor.toLocaleString()} kg CO₂eq/t — higher than the typical range for this crop.`,
+    bench, tier: 2,
+  }
+}
+
+const CROP_EMOJI = [
+  [['wheat', 'barley', 'oat', 'rye', 'triticale', 'maize', 'corn', 'sorghum', 'millet', 'teff', 'rice'], '🌾'],
+  [['soybean', 'soya', 'groundnut', 'peanut', 'pea', 'bean', 'chickpea', 'lentil', 'alfalfa', 'clover'], '🫘'],
+  [['potato', 'cassava', 'yam', 'sweet potato'], '🥔'],
+  [['rapeseed', 'canola', 'sunflower', 'linseed'], '🌻'],
+  [['coffee'], '☕'],
+  [['sugar beet', 'sugarcane', 'sugar cane'], '🍬'],
+  [['cotton'], '🪡'],
+  [['tomato', 'vegetable', 'onion'], '🥦'],
+]
+const getCropEmoji = (cropType = '') => {
+  const ct = cropType.toLowerCase()
+  const match = CROP_EMOJI.find(([keys]) => keys.some(k => ct.includes(k)))
+  return match ? match[1] : '🌱'
+}
 
 const isNitrogenRelated = (category) =>
   category?.includes('Non-land') || category?.includes('Land management')
@@ -244,6 +305,20 @@ export default function AssessmentDetail() {
     : nue <= 90 ? styles.nueHigh
     : styles.nueMining
 
+  // Field context
+  const cropDisplay  = run?.runMetadata?.subCategory ?? run?.inputData?.cropDetails?.cropType
+  const areaHa       = run?.inputData?.cropDetails?.area?.value
+  const yieldRaw     = run?.inputData?.cropDetails?.farmGate?.value ?? run?.inputData?.cropDetails?.cropYield?.value
+  const yieldRawUnit = (run?.inputData?.cropDetails?.farmGate?.unit ?? run?.inputData?.cropDetails?.cropYield?.unit ?? '').toLowerCase()
+  const totalYieldT  = yieldRaw != null ? (yieldRawUnit.includes('tonne') ? yieldRaw : yieldRaw / 1000) : null
+  const yieldPerHaT  = totalYieldT != null && areaHa ? totalYieldT / areaHa : null
+
+  // Emission intensity
+  const netBalance      = summary?.assessmentYear?.CO2eq?.balance
+  const balancePerHa    = areaHa && netBalance != null ? netBalance / areaHa : null
+  const balancePerTonne = totalYieldT && totalYieldT > 0 && netBalance != null ? netBalance / totalYieldT : null
+  const emissionRating  = getEmissionRating(balancePerTonne, nueCalc?.cropKey)
+
   return (
     <div className={styles.page}>
       <Link to="/assessments" className={styles.back}>
@@ -263,6 +338,36 @@ export default function AssessmentDetail() {
         </div>
       </div>
 
+      {/* Field context strip */}
+      {(cropDisplay || areaHa || yieldPerHaT || assessment.farm?.country) && (
+        <div className={styles.fieldBar}>
+          {cropDisplay && (
+            <span className={styles.fieldChip}>
+              <span className={styles.fieldChipIcon}>{getCropEmoji(cropDisplay)}</span>
+              <span className={styles.fieldChipText}>{cropDisplay}</span>
+            </span>
+          )}
+          {areaHa && (
+            <span className={styles.fieldChip}>
+              <span className={styles.fieldChipIcon}>📐</span>
+              <span className={styles.fieldChipText}>{areaHa % 1 < 0.05 ? Math.round(areaHa) : areaHa.toFixed(1)} ha field</span>
+            </span>
+          )}
+          {yieldPerHaT && (
+            <span className={styles.fieldChip}>
+              <span className={styles.fieldChipIcon}>📦</span>
+              <span className={styles.fieldChipText}>{yieldPerHaT.toFixed(1)} t / ha yield</span>
+            </span>
+          )}
+          {assessment.farm?.country && (
+            <span className={styles.fieldChip}>
+              <span className={styles.fieldChipIcon}>📍</span>
+              <span className={styles.fieldChipText}>{assessment.farm.country}</span>
+            </span>
+          )}
+        </div>
+      )}
+
       {summary && (
         <div className={styles.summaryRow}>
           <Card className={styles.summaryCard}>
@@ -271,6 +376,7 @@ export default function AssessmentDetail() {
               {fmt(summary.assessmentYear?.CO2eq?.emissions)}
               <span className={styles.unit}> kg CO₂eq</span>
             </p>
+            <p className={styles.summaryHint}>N₂O, CO₂ &amp; CH₄ released</p>
           </Card>
           <Card className={styles.summaryCard}>
             <p className={styles.summaryLabel}>Removals</p>
@@ -278,6 +384,7 @@ export default function AssessmentDetail() {
               {fmt(summary.assessmentYear?.CO2eq?.removals)}
               <span className={styles.unit}> kg CO₂eq</span>
             </p>
+            <p className={styles.summaryHint}>carbon sequestered in soil</p>
           </Card>
           <Card className={`${styles.summaryCard} ${styles.balanceCard}`}>
             <p className={styles.summaryLabel}>Net Balance</p>
@@ -285,8 +392,92 @@ export default function AssessmentDetail() {
               {fmt(summary.assessmentYear?.CO2eq?.balance)}
               <span className={styles.unit}> kg CO₂eq</span>
             </p>
+            <p className={styles.summaryHint}>emissions minus removals</p>
           </Card>
         </div>
+      )}
+
+      {/* Emission intensity card */}
+      {(balancePerHa != null || balancePerTonne != null) && (
+        <Card>
+          <h2 className={styles.sectionTitle}>Emission Intensity</h2>
+          <p className={styles.sectionDesc}>
+            Total emissions divided by field area and crop yield — these per-unit figures make it
+            possible to compare across different farm sizes and benchmark against typical values.
+          </p>
+
+          <div className={styles.intensityStats}>
+            {balancePerHa != null && (
+              <div className={styles.intensityStat}>
+                <span className={styles.intensityValue}>{fmtInt(balancePerHa)}</span>
+                <span className={styles.intensityUnit}>kg CO₂eq / ha</span>
+                <span className={styles.intensityLabel}>per hectare</span>
+              </div>
+            )}
+            {balancePerTonne != null && (
+              <div className={styles.intensityStat}>
+                <span className={styles.intensityValue}>{fmtInt(balancePerTonne)}</span>
+                <span className={styles.intensityUnit}>kg CO₂eq / tonne</span>
+                <span className={styles.intensityLabel}>per tonne of crop</span>
+              </div>
+            )}
+            {emissionRating && (
+              <div className={styles.intensityRating} style={{ background: emissionRating.bg }}>
+                <p className={styles.intensityRatingLabel} style={{ color: emissionRating.color }}>
+                  {emissionRating.label}
+                </p>
+                <p className={styles.intensityRatingDesc}>{emissionRating.desc}</p>
+              </div>
+            )}
+          </div>
+
+          {/* Visual benchmark scale */}
+          {emissionRating?.bench && balancePerTonne != null && (
+            <div className={styles.benchScale}>
+              <p className={styles.benchScaleTitle}>How does this compare?</p>
+              <div className={styles.benchBar}>
+                <div className={styles.benchBarFill} />
+                {(() => {
+                  const { good, poor } = emissionRating.bench
+                  const max = poor * 1.6
+                  const pct = Math.min(100, Math.max(0, (balancePerTonne / max) * 100))
+                  const goodPct = (good / max) * 100
+                  const poorPct = (poor / max) * 100
+                  return (
+                    <>
+                      <div className={styles.benchMarkerGood} style={{ left: `${goodPct}%` }} />
+                      <div className={styles.benchMarkerPoor} style={{ left: `${poorPct}%` }} />
+                      <div className={styles.benchMarker} style={{ left: `${pct}%` }}>
+                        <div className={styles.benchMarkerDot} style={{ borderColor: emissionRating.color }} />
+                        <div className={styles.benchMarkerVal} style={{ color: emissionRating.color }}>
+                          {fmtInt(balancePerTonne)} kg/t
+                        </div>
+                      </div>
+                    </>
+                  )
+                })()}
+              </div>
+              <div className={styles.benchLabels}>
+                <span>0</span>
+                <span style={{ left: `${(emissionRating.bench.good / (emissionRating.bench.poor * 1.6)) * 100}%`, position: 'absolute' }}>
+                  {emissionRating.bench.good.toLocaleString()} — typical low
+                </span>
+                <span style={{ left: `${(emissionRating.bench.poor / (emissionRating.bench.poor * 1.6)) * 100}%`, position: 'absolute' }}>
+                  {emissionRating.bench.poor.toLocaleString()} — typical high
+                </span>
+              </div>
+              <p className={styles.benchNote}>
+                Indicative farm-gate benchmarks for {cropDisplay ?? 'this crop'} (kg CO₂eq per tonne).
+                Source: Poore &amp; Nemecek 2018.
+              </p>
+            </div>
+          )}
+          {emissionRating?.tier === -1 && (
+            <p className={styles.sinkNote}>
+              🌱 Net carbon sink: removals exceed emissions for this assessment year.
+            </p>
+          )}
+        </Card>
       )}
 
       {nueCalc && (
@@ -520,6 +711,27 @@ export default function AssessmentDetail() {
           </pre>
         </Card>
       )}
+
+      <div className={styles.chatbotBanner}>
+        <div className={styles.chatbotIcon}>🤖</div>
+        <div className={styles.chatbotBody}>
+          <p className={styles.chatbotTitle}>Need help interpreting these results?</p>
+          <p className={styles.chatbotDesc}>
+            The Cool Farm Nitrogen Navigator is an AI assistant trained on the Cool Farm
+            methodology, FAOSTAT data, and NUE research literature. Ask it to explain your
+            NUE score, what your N balance means in practice, or how to reduce emissions
+            per tonne of output.
+          </p>
+        </div>
+        <a
+          href="https://chatgpt.com/g/g-6a3500247c2081919f67bd93bcae4888-cool-farm-nitrogen-navigator"
+          target="_blank"
+          rel="noopener noreferrer"
+          className={styles.chatbotBtn}
+        >
+          Open Chatbot →
+        </a>
+      </div>
     </div>
   )
 }

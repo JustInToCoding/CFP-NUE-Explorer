@@ -7,6 +7,7 @@ import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner'
 import ErrorBanner from '../../components/ErrorBanner/ErrorBanner'
 import Badge from '../../components/Badge/Badge'
 import EmptyState from '../../components/EmptyState/EmptyState'
+import NueSweetspotGauge from '../../components/NueSweetspotGauge/NueSweetspotGauge'
 import styles from './AssessmentDetail.module.css'
 
 const fmt = (n) => (n != null ? Number(n).toFixed(3) : '—')
@@ -361,6 +362,22 @@ export default function AssessmentDetail() {
               )}
             </div>
           )}
+        </Card>
+      )}
+
+      {nueCalc && nue != null && (
+        <Card>
+          <h2 className={styles.sectionTitle}>NUE Sweetspot</h2>
+          <p className={styles.sectionDesc}>
+            Optimal NUE range for this crop and climate. Below the sweetspot: N losses exceed uptake.
+            Above: crop draws on soil N reserves (mining). Range adjusted for IPCC climate zone.
+          </p>
+          <NueSweetspotGauge
+            nue={nue}
+            cropKey={nueCalc.cropKey}
+            cropLabel={nueCalc.cropKey}
+            climate={assessment.farm?.climate}
+          />
         </Card>
       )}
 

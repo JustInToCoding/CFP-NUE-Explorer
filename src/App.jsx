@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import Layout from './components/Layout/Layout'
 import Home from './pages/Home/Home'
 import ValueProposition from './pages/ValueProposition/ValueProposition'
+import WinWin from './pages/WinWin/WinWin'
 import LogicModel from './pages/LogicModel/LogicModel'
 import Foundation from './pages/Foundation/Foundation'
 import Roadmap from './pages/Roadmap/Roadmap'
@@ -26,6 +27,7 @@ export default function App() {
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
           <Route path="value-proposition" element={<ValueProposition />} />
+          <Route path="win-win" element={<WinWin />} />
           <Route path="logic-model" element={<LogicModel />} />
           <Route path="foundation" element={<Foundation />} />
           <Route path="roadmap" element={<Roadmap />} />

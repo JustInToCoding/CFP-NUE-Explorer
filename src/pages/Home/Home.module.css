@@ -43,7 +43,6 @@
   padding: 0.65rem 1rem;
   line-height: 1.6;
   margin: 0;
-  max-width: 54rem;
 }
 
 /* ── Shared tag ── */
@@ -122,6 +121,31 @@
   font-style: italic;
   line-height: 1.8;
   color: var(--color-text);
+  margin: 0;
+}
+
+/* ── Methodology ── */
+.methodologySection {
+  display: flex;
+  flex-direction: column;
+}
+
+.methodologyCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.methodologyHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.methodologyBody {
+  font-size: 0.95rem;
+  color: var(--color-text);
+  line-height: 1.75;
   margin: 0;
 }
 

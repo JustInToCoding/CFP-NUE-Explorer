@@ -1,9 +1,10 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 3rem;
 }
 
+/* ── Header ── */
 .header {
   display: flex;
   flex-direction: column;
@@ -31,6 +32,78 @@
 
 .subtitle {
   font-size: 1rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 60ch;
+}
+
+.sectionTitle {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+/* ── Goal / Mission / Vision ── */
+.pillarGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.25rem;
+}
+
+.pillarCard {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  border-top: 4px solid transparent;
+}
+
+.pillarGreen  { border-top-color: var(--color-primary); }
+.pillarTeal   { border-top-color: #0d7680; }
+.pillarPurple { border-top-color: var(--color-n2o); }
+
+.pillarTop {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.pillarIcon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.pillarLabel {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+}
+
+.pillarText {
+  font-size: 0.925rem;
+  color: var(--color-text);
+  line-height: 1.75;
+  margin: 0;
+}
+
+/* ── Win-Win ── */
+.winSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.winHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.winSubtitle {
+  font-size: 0.95rem;
   color: var(--color-text-muted);
   line-height: 1.65;
   margin: 0;
@@ -86,7 +159,7 @@
   margin: 0;
 }
 
-.footer {
+.winFooter {
   background: color-mix(in srgb, var(--color-primary) 6%, var(--color-surface));
   border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent);
   border-radius: var(--radius);
@@ -95,4 +168,39 @@
   font-style: italic;
   color: var(--color-text);
   line-height: 1.6;
+}
+
+/* ── Competitive Analysis ── */
+.competitiveSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.competitiveHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.competitiveSubtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-muted);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 60ch;
+}
+
+.competitiveImageWrap {
+  border: 1px solid var(--color-border, #e5e7eb);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: #fff;
+  max-width: 560px;
+}
+
+.competitiveImage {
+  width: 100%;
+  height: auto;
+  display: block;
 }

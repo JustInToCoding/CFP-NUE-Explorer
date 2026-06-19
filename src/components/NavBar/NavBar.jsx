@@ -10,7 +10,8 @@ const dataLinks = [
 
 const projectLinks = [
   { to: '/', label: 'About', end: true },
-  { to: '/value-proposition', label: 'WIn Win narrative' },
+  { to: '/value-proposition', label: 'Value Proposition' },
+  { to: '/win-win', label: 'Win-Win Narrative' },
   { to: '/logic-model', label: 'Logic Model' },
   { to: '/foundation', label: 'Foundation' },
   { to: '/roadmap', label: 'Roadmap' },
@@ -52,6 +53,11 @@ export default function NavBar() {
           <li>
             <a href="/mockup.html" className={styles.link} target="_blank" rel="noopener noreferrer">
               Mockup ↗
+            </a>
+          </li>
+          <li>
+            <a href="https://chatgpt.com/g/g-6a3500247c2081919f67bd93bcae4888-cool-farm-nitrogen-navigator" className={styles.link} target="_blank" rel="noopener noreferrer">
+              Chatbot ↗
             </a>
           </li>
         </ul>

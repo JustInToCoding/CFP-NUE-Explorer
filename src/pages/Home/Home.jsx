@@ -36,8 +36,15 @@ const features = [
 const projectPages = [
   {
     to: '/value-proposition',
+    icon: '🎯',
+    title: 'Value Proposition',
+    desc: 'Goal, mission and vision — plus competitive analysis of how Cool Farm stands out on NUE.',
+    accent: styles.accentGreen,
+  },
+  {
+    to: '/win-win',
     icon: '🏆',
-    title: 'WIn Win narrative',
+    title: 'Win-Win Narrative',
     desc: 'One feature, three wins — how a single NUE number creates value for farmers, sourcing teams, and sustainability leads.',
     accent: styles.accentGreen,
   },
@@ -126,6 +133,26 @@ export default function Home() {
             what GHG or compliance-focused reporting alone achieves, and does this result in
             measurable improvements in farm-gate NUE and reductions in N-related GHG emissions
             per tonne of output?
+          </p>
+        </Card>
+      </section>
+
+      {/* ── Methodology ── */}
+      <section className={styles.methodologySection}>
+        <Card className={styles.methodologyCard}>
+          <div className={styles.methodologyHeader}>
+            <span className={styles.sectionTag}>Methodology</span>
+            <h2 className={styles.sectionTitle}>Our Methodology</h2>
+          </div>
+          <p className={styles.methodologyBody}>
+            The Cool Farm methodology uses farm-level activity data, scientifically validated models,
+            and open-source sustainability indicators to assess environmental performance in
+            agricultural supply chains. For Nitrogen Use Efficiency (NUE), the methodology follows
+            Oenema et al. (2015), calculating the efficiency of nitrogen utilization in annual crop
+            production based on nitrogen inputs and outputs. The methodology enables benchmarking,
+            scenario analysis, and the quantification of links between nutrient management and
+            greenhouse gas emissions, providing actionable insights for farmers, processors, and
+            food companies.
           </p>
         </Card>
       </section>

@@ -1,27 +1,24 @@
 import Card from '../../components/Card/Card'
 import styles from './ValueProposition.module.css'
 
-const personas = [
+const pillars = [
   {
-    emoji: '👩‍🌾',
-    name: 'Sarah',
-    role: 'Farmer',
-    accent: styles.personaGreen,
-    text: 'Sees her NUE score for free, alongside the GHG assessment she already completes for her buyer. Lower N surplus is direct margin — fertiliser is her biggest cost — so reducing waste pays for itself while cutting emissions.',
+    icon: '🎯',
+    label: 'Goal',
+    color: styles.pillarGreen,
+    text: 'To develop a visual, user-friendly dashboard interface on the Cool Farm Platform that elevates existing agronomic models, enabling crop processors to benchmark farm-gate performance and directly quantify the impact of nitrogen use efficiency (NUE) optimisation on GHG emissions reduction.',
   },
   {
-    emoji: '🌿',
-    name: 'Sophie',
-    role: 'Sustainable Sourcing',
-    accent: styles.personaTeal,
-    text: 'Gets Sarah\'s score rolled up into trends, regional breakdowns, and practice adoption data. She can finally point to evidence — not just an ask — when building supplier programmes, and report progress against CSRD and retailer targets.',
+    icon: '🚀',
+    label: 'Mission',
+    color: styles.pillarTeal,
+    text: 'To deliver the advanced visualization tools necessary for crop processors to make informed decisions, optimizing farm-gate nutrient use efficiency while clearly demonstrating and quantifying its direct impact on greenhouse gas (GHG) emissions reduction.',
   },
   {
-    emoji: '👔',
-    name: 'Marcus',
-    role: 'VP of Sustainability',
-    accent: styles.personaPurple,
-    text: 'Sees one metric: the cost and emissions gap between his best and worst suppliers. That\'s the business case his board needs — proof that funding agronomy support delivers a return, not just a pledge.',
+    icon: '🔭',
+    label: 'Vision',
+    color: styles.pillarPurple,
+    text: 'To lead the transition towards data-driven, sustainable agriculture by making complex nitrogen metrics clear, actionable and universally accessible for agri-processing organisations in crop farming worldwide.',
   },
 ]
 
@@ -29,32 +26,43 @@ export default function ValueProposition() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        <span className={styles.tag}>WIn Win narrative</span>
-        <h1 className={styles.title}>One Feature, Three Wins</h1>
+        <span className={styles.tag}>Value Proposition</span>
+        <h1 className={styles.title}>Goal, Mission &amp; Vision</h1>
         <p className={styles.subtitle}>
-          A single farm-level number — kg grain per kg nitrogen — travels up the supply chain,
-          creating value at each step without anyone re-entering data.
+          The strategic intent behind the CFP NUE Explorer — from immediate product goal
+          to long-term vision for sustainable agriculture.
         </p>
       </header>
 
-      <div className={styles.personaGrid}>
-        {personas.map(({ emoji, name, role, accent, text }) => (
-          <Card key={name} className={`${styles.personaCard} ${accent}`}>
-            <div className={styles.personaTop}>
-              <span className={styles.personaEmoji}>{emoji}</span>
-              <div>
-                <div className={styles.personaName}>{name}</div>
-                <div className={styles.personaRole}>{role}</div>
-              </div>
+      <div className={styles.pillarGrid}>
+        {pillars.map(({ icon, label, color, text }) => (
+          <Card key={label} className={`${styles.pillarCard} ${color}`}>
+            <div className={styles.pillarTop}>
+              <span className={styles.pillarIcon}>{icon}</span>
+              <span className={styles.pillarLabel}>{label}</span>
             </div>
-            <p className={styles.personaText}>{text}</p>
+            <p className={styles.pillarText}>{text}</p>
           </Card>
         ))}
       </div>
 
-      <div className={styles.footer}>
-        One dataset. Sarah gets more profitable, Sophie gets a programme that works, Marcus gets the evidence to fund it.
-      </div>
+      <section className={styles.competitiveSection}>
+        <div className={styles.competitiveHeader}>
+          <span className={styles.tag}>Market Research</span>
+          <h2 className={styles.sectionTitle}>Competitive Analysis</h2>
+          <p className={styles.competitiveSubtitle}>
+            How Cool Farm stands out as the only platform that makes NUE visible,
+            actionable, and impactful for farmers, processors, and the planet.
+          </p>
+        </div>
+        <div className={styles.competitiveImageWrap}>
+          <img
+            src="/competitive-analysis.jpeg"
+            alt="Market research: How Cool Farm stands out on NUE — competitive comparison table"
+            className={styles.competitiveImage}
+          />
+        </div>
+      </section>
     </div>
   )
 }

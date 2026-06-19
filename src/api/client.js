@@ -1,16 +1,12 @@
-import { mockRequest } from './mock'
-
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
-const BASE = '/api'
+const BASE = 'https://api.cfp.coolfarm.org'
 
 const request = async (method, path, body) => {
-  if (USE_MOCK) return mockRequest(method, path, body)
-
+  const token = localStorage.getItem('cfp_token') ?? ''
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `${import.meta.env.VITE_CFP_API_TOKEN}`,
+      ...(token ? { Authorization: token } : {}),
     },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })

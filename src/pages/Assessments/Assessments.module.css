@@ -169,3 +169,12 @@
 .viewLink:hover {
   text-decoration: underline;
 }
+
+.nBal {
+  font-size: 0.85rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+.nBalPos { color: #d93636; }
+.nBalNeg { color: #7c3aed; }
+.nBalOk  { color: #16a34a; }

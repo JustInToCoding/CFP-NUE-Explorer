@@ -4,7 +4,9 @@
       "WebFetch(domain:www.fao.org)",
       "WebFetch(domain:faostatapi.fao.org)",
       "WebFetch(domain:fenixservices.fao.org)",
-      "WebSearch"
+      "WebSearch",
+      "WebFetch(domain:api.ifastat.org)",
+      "WebFetch(domain:ifastat.org)"
     ]
   }
 }

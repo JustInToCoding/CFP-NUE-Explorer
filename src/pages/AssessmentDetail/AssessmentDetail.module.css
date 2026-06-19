@@ -314,6 +314,69 @@
   color: var(--color-text);
 }
 
+.nBalanceGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin: 0.75rem 0 1rem;
+}
+
+@media (max-width: 600px) {
+  .nBalanceGrid { grid-template-columns: 1fr; }
+}
+
+.nBalanceColTitle {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.nBalanceRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.3rem 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: 0.875rem;
+}
+
+.nBalanceTotal {
+  font-weight: 600;
+  border-bottom: 2px solid var(--color-border);
+}
+
+.nBalanceMuted {
+  color: var(--color-text-muted);
+  font-size: 0.8em;
+}
+
+.nBalanceResult {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius);
+  margin-top: 0.25rem;
+}
+
+.nBalanceResultValue {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.nBalanceResultLabel {
+  font-size: 0.85rem;
+}
+
+.balanceDeficit  { background: #f3eeff; color: #7c3aed; }
+.balanceSustain  { background: #ecfdf5; color: #16a34a; }
+.balanceMid      { background: #fffbeb; color: #d97706; }
+.balanceHigh     { background: #fef2f2; color: #d93636; }
+
 .json {
   background: #f6f7f6;
   border: 1px solid var(--color-border);

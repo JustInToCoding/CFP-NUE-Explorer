@@ -2,12 +2,30 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useFarms, useCreateFarm } from '../../hooks/useFarms'
 import { useFarmSoil } from '../../hooks/useSoil'
+import { useFarmSoilGrids } from '../../hooks/useFarmSoilGrids'
 import Card from '../../components/Card/Card'
 import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner'
 import ErrorBanner from '../../components/ErrorBanner/ErrorBanner'
 import EmptyState from '../../components/EmptyState/EmptyState'
 import Badge from '../../components/Badge/Badge'
 import styles from './Farms.module.css'
+
+// Keyed by substring of the IPCC Soil Class string returned by CFP API
+const IPCC_SOIL_INFO = {
+  'High Activity Clay': { ef: 'Standard EF₁',    risk: 'medium',   desc: 'High-CEC mineral soil. Standard N₂O emission factor (EF₁ = 0.01).' },
+  'Low Activity Clay':  { ef: 'Standard EF₁',    risk: 'medium',   desc: 'Low-CEC mineral soil, common in tropics. Standard N₂O EF₁.' },
+  'Sandy':              { ef: 'Lower N₂O risk',  risk: 'low',      desc: 'Low water retention — N loss via leaching dominates over N₂O.' },
+  'Volcanic':           { ef: 'Variable EF₁',    risk: 'variable', desc: 'Andosols — high P fixation, distinct N₂O behaviour.' },
+  'Organic':            { ef: 'Elevated EF₁ₒₛ', risk: 'high',     desc: 'Peat/organic soil. Higher N₂O from organic matter mineralisation.' },
+  'Wetland':            { ef: 'Elevated EF₁ₒₛ', risk: 'high',     desc: 'Waterlogged. Elevated N₂O and CH₄ emissions.' },
+  'Spodic':             { ef: 'Standard EF₁',    risk: 'medium',   desc: 'Cool forest mineral soil. Standard EF₁ applies.' },
+}
+
+const getIpccInfo = (cls) =>
+  Object.entries(IPCC_SOIL_INFO).find(([k]) => cls?.includes(k))?.[1] ?? null
+
+const fmtSoc = (v) => v != null ? `${v.toFixed(1)} g/kg` : '—'
+const fmtPh  = (v) => v != null ? v.toFixed(1) : '—'
 
 const CLIMATE_ZONES = [
   'Tropical Montane', 'Tropical Wet', 'Tropical Moist', 'Tropical Dry',
@@ -25,8 +43,12 @@ const EMPTY_FORM = {
 }
 
 function FarmRow({ farm }) {
-  const { data, isLoading } = useFarmSoil(farm)
+  const { data: soilClass, isLoading: scLoading } = useFarmSoil(farm)
+  const { data: sgProps,   isLoading: sgLoading } = useFarmSoilGrids(farm)
   const navigate = useNavigate()
+
+  const ipccInfo = getIpccInfo(soilClass?.ipccSoilClass)
+
   return (
     <tr
       className={styles.clickableRow}
@@ -41,16 +63,31 @@ function FarmRow({ farm }) {
       </td>
       <td>{farm.annualAverageTemperature?.value} {farm.annualAverageTemperature?.unit}</td>
       <td className={styles.soilCell}>
-        {isLoading
+        {scLoading
           ? <span className={styles.soilLoading}>…</span>
-          : data?.ipccSoilClass
-          ? <Badge variant="n2o">{data.ipccSoilClass}</Badge>
+          : soilClass?.ipccSoilClass
+          ? <>
+              <Badge variant="n2o" title={ipccInfo?.desc}>{soilClass.ipccSoilClass}</Badge>
+              {ipccInfo && <span className={styles.efLabel}>{ipccInfo.ef}</span>}
+            </>
           : '—'}
       </td>
       <td className={styles.soilCell}>
-        {isLoading
+        {scLoading
           ? <span className={styles.soilLoading}>…</span>
-          : data?.wrbSoilClass ?? '—'}
+          : soilClass?.wrbSoilClass ?? '—'}
+      </td>
+      <td className={styles.soilCell}>
+        {sgLoading
+          ? <span className={styles.soilLoading}>…</span>
+          : <span className={sgProps?.soc != null ? styles.socValue : ''}>
+              {fmtSoc(sgProps?.soc)}
+            </span>}
+      </td>
+      <td className={styles.soilCell}>
+        {sgLoading
+          ? <span className={styles.soilLoading}>…</span>
+          : fmtPh(sgProps?.ph)}
       </td>
     </tr>
   )
@@ -211,6 +248,8 @@ export default function Farms() {
                   <th>Avg Temp</th>
                   <th>IPCC Soil Class</th>
                   <th>WRB Soil Class</th>
+                  <th>SOC 0–5 cm</th>
+                  <th>pH 0–5 cm</th>
                 </tr>
               </thead>
               <tbody>

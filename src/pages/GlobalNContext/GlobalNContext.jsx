@@ -91,8 +91,9 @@ export default function GlobalNContext() {
     [ctries.data]
   )
 
-  const nueQ   = useFaostatData('ESB', { area: areaCode, element: nueEl?.code,  item: esbNIt?.code }, { enabled: !!areaCode && !!nueEl  && !!esbNIt })
-  const nfertQ = useFaostatData('RFN', { area: areaCode, element: auEl?.code,   item: rfnNIt?.code }, { enabled: !!areaCode && !!auEl   && !!rfnNIt })
+  // ESB is a single-nutrient (N) domain — item param is optional; omit it if the code lookup misses
+  const nueQ   = useFaostatData('ESB', { area: areaCode, element: nueEl?.code,  item: esbNIt?.code }, { enabled: !!areaCode && !!nueEl })
+  const nfertQ = useFaostatData('RFN', { area: areaCode, element: auEl?.code,   item: rfnNIt?.code }, { enabled: !!areaCode && !!auEl  && !!rfnNIt })
 
   const nuePoints   = useMemo(() => parsePoints(nueQ.data),   [nueQ.data])
   const nfertPoints = useMemo(() => parsePoints(nfertQ.data), [nfertQ.data])

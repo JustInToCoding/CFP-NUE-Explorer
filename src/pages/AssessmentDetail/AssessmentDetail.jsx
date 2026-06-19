@@ -53,6 +53,34 @@ const CROP_N_CONTENT = {
   coffee: 0.020,
 }
 
+// Biological N fixation rates (kg N/ha/yr). 0 for non-legumes. Source: Peoples et al. 2009 review.
+const CROP_BNF = {
+  soybean: 150, soya: 150, soybeans: 150,
+  alfalfa: 200, lucerne: 200,
+  clover: 150,
+  pea: 60, peas: 60,
+  'field bean': 90, 'fava bean': 90, 'fava beans': 90,
+  bean: 40, beans: 40,
+  chickpea: 50, lentil: 50, lentils: 50,
+  groundnut: 100, peanut: 100,
+}
+
+const getCropBnf = (cropType = '') => {
+  const key = Object.keys(CROP_BNF).find((k) => cropType.toLowerCase().includes(k))
+  return key ? CROP_BNF[key] : 0
+}
+
+const calcNBalance = (nueCalc, bnfPerHa, depositionPerHa) => {
+  if (!nueCalc || nueCalc.nAppliedPerHa == null) return null
+  const synthetic = nueCalc.nAppliedPerHa
+  const bnf       = bnfPerHa ?? 0
+  const dep       = depositionPerHa ?? null
+  const totalInputs = synthetic + bnf + (dep ?? 0)
+  const nRemoved    = nueCalc.nRemovedPerHa
+  const balance     = nRemoved != null ? totalInputs - nRemoved : null
+  return { synthetic, bnf, dep, totalInputs, nRemoved, balance }
+}
+
 // FAOSTAT helpers — find a code by label keyword, match farm country to FAOSTAT country list
 const findFaoCode = (items = [], ...keywords) =>
   items.find(c => keywords.some(kw => c.label?.toLowerCase().includes(kw.toLowerCase())))
@@ -144,16 +172,23 @@ export default function AssessmentDetail() {
   const esbCtry = useFaostatCodes('ESB', 'countries')
 
   const farmCountry = assessment?.farm?.country
-  const nueElCode  = useMemo(() => findFaoCode(esbEl.data?.data, 'efficiency', 'nue'),        [esbEl.data])
-  const esbNItCode = useMemo(() => findFaoCode(esbIt.data?.data, 'nitrogen (n)', 'nitrogen'), [esbIt.data])
-  const ctryMatch  = useMemo(() => matchFaoCountry(farmCountry, esbCtry.data?.data),          [farmCountry, esbCtry.data])
+  const nueElCode  = useMemo(() => findFaoCode(esbEl.data?.data, 'efficiency', 'nue'),                     [esbEl.data])
+  const depElCode  = useMemo(() => findFaoCode(esbEl.data?.data, 'atmospheric deposition', 'deposition'),  [esbEl.data])
+  const esbNItCode = useMemo(() => findFaoCode(esbIt.data?.data, 'nitrogen (n)', 'nitrogen'),              [esbIt.data])
+  const ctryMatch  = useMemo(() => matchFaoCountry(farmCountry, esbCtry.data?.data),                       [farmCountry, esbCtry.data])
 
-  const ctryNueQ     = useFaostatData('ESB',
+  const ctryNueQ = useFaostatData('ESB',
     { area: ctryMatch?.code, element: nueElCode?.code, item: esbNItCode?.code },
     { enabled: !!ctryMatch && !!nueElCode && !!esbNItCode }
   )
-  const ctryNuePoints  = useMemo(() => parseFaoPoints(ctryNueQ.data), [ctryNueQ.data])
-  const latestCtryNUE  = ctryNuePoints[ctryNuePoints.length - 1]
+  const ctryDepQ = useFaostatData('ESB',
+    { area: ctryMatch?.code, element: depElCode?.code, item: esbNItCode?.code },
+    { enabled: !!ctryMatch && !!depElCode && !!esbNItCode }
+  )
+  const ctryNuePoints = useMemo(() => parseFaoPoints(ctryNueQ.data), [ctryNueQ.data])
+  const latestCtryNUE = ctryNuePoints[ctryNuePoints.length - 1]
+  const depPoints     = useMemo(() => parseFaoPoints(ctryDepQ.data), [ctryDepQ.data])
+  const latestDep     = depPoints[depPoints.length - 1]
 
   const [manualCropNPct, setManualCropNPct] = useState(null)
 
@@ -185,6 +220,21 @@ export default function AssessmentDetail() {
 
   const nueCalc = calcNUE(run, manualCropNPct)
   const nue = nueCalc?.nue
+
+  const bnfPerHa      = nueCalc ? getCropBnf(nueCalc.cropType) : null
+  const depositionPerHa = latestDep?.value ?? null
+  const nBalance      = calcNBalance(nueCalc, bnfPerHa, depositionPerHa)
+
+  const balanceClass = nBalance?.balance == null ? ''
+    : nBalance.balance < -10  ? styles.balanceDeficit
+    : nBalance.balance <= 20  ? styles.balanceSustain
+    : nBalance.balance <= 60  ? styles.balanceMid
+    : styles.balanceHigh
+  const balanceLabel = nBalance?.balance == null ? ''
+    : nBalance.balance < -10  ? 'N deficit — possible soil mining'
+    : nBalance.balance <= 20  ? 'Balanced'
+    : nBalance.balance <= 60  ? 'Moderate N surplus'
+    : 'High N surplus — leaching risk'
   const nueMining = nue != null && nue > 90
   const nueClass = nue == null
     ? ''
@@ -323,6 +373,73 @@ export default function AssessmentDetail() {
             </div>
           ))}
         </div>
+      )}
+
+      {nBalance && (
+        <Card>
+          <h2 className={styles.sectionTitle}>Farm-gate N Balance</h2>
+          <p className={styles.sectionDesc}>
+            N inputs minus N removed in harvest (kg N/ha). A positive balance is a surplus — potential leaching or N₂O risk. Negative is a deficit — possible soil N mining.
+          </p>
+
+          <div className={styles.nBalanceGrid}>
+            <div className={styles.nBalanceCol}>
+              <h3 className={styles.nBalanceColTitle}>Inputs (kg N/ha)</h3>
+              <div className={styles.nBalanceRow}>
+                <span>Synthetic fertiliser</span>
+                <span>{fmtN(nBalance.synthetic)}</span>
+              </div>
+              <div className={styles.nBalanceRow}>
+                <span>Biological N fixation{nBalance.bnf > 0 ? ` (${nueCalc.cropKey})` : ''}</span>
+                <span>{nBalance.bnf > 0 ? fmtN(nBalance.bnf) : <span className={styles.nBalanceMuted}>0 (non-legume)</span>}</span>
+              </div>
+              <div className={styles.nBalanceRow}>
+                <span>
+                  Atmospheric deposition
+                  {nBalance.dep != null && latestDep && (
+                    <span className={styles.nBalanceMuted}> · FAOSTAT {latestDep.year}</span>
+                  )}
+                </span>
+                <span>
+                  {nBalance.dep != null
+                    ? fmtN(nBalance.dep)
+                    : <span className={styles.nBalanceMuted}>loading…</span>}
+                </span>
+              </div>
+              <div className={`${styles.nBalanceRow} ${styles.nBalanceTotal}`}>
+                <span>Total inputs</span>
+                <span>{fmtN(nBalance.totalInputs)}</span>
+              </div>
+            </div>
+
+            <div className={styles.nBalanceCol}>
+              <h3 className={styles.nBalanceColTitle}>Outputs (kg N/ha)</h3>
+              <div className={styles.nBalanceRow}>
+                <span>N removed in harvest</span>
+                <span>{nBalance.nRemoved != null ? fmtN(nBalance.nRemoved) : <span className={styles.nBalanceMuted}>—</span>}</span>
+              </div>
+              <div className={`${styles.nBalanceRow} ${styles.nBalanceTotal}`}>
+                <span>Total outputs</span>
+                <span>{nBalance.nRemoved != null ? fmtN(nBalance.nRemoved) : '—'}</span>
+              </div>
+            </div>
+          </div>
+
+          {nBalance.balance != null && (
+            <div className={`${styles.nBalanceResult} ${balanceClass}`}>
+              <span className={styles.nBalanceResultValue}>
+                {nBalance.balance >= 0 ? '+' : ''}{fmtN(nBalance.balance)} kg N/ha
+              </span>
+              <span className={styles.nBalanceResultLabel}>{balanceLabel}</span>
+            </div>
+          )}
+
+          {nBalance.balance == null && (
+            <p className={styles.nBalanceMuted} style={{ marginTop: '0.5rem' }}>
+              Add crop N content above to complete the balance calculation.
+            </p>
+          )}
+        </Card>
       )}
 
       <Card>

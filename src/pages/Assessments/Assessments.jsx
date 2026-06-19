@@ -32,6 +32,26 @@ const fmtBalance = (n) => {
 
 const getActiveRun = (a) => a.submittedRun ?? a.draftRun
 
+// Best-effort N balance from list data — only works when the API includes inputData in the list response
+const quickNBalance = (run) => {
+  if (!run?.inputData) return null
+  const fertilisers = run.inputData.fertiliser?.fertilisers ?? []
+  const area = run.inputData.cropDetails?.area?.value
+  if (!area || !fertilisers.length) return null
+  let nApplied = 0
+  for (const f of fertilisers) {
+    const nPct = f.nitrogenPercentage ?? parseFloat(f.predefinedFertiliserType?.match(/(\d+\.?\d*)\s*%\s*N/i)?.[1])
+    if (!nPct) continue
+    if (f.predefinedApplicationRate != null) {
+      const rate = f.predefinedApplicationRate.value ?? 0
+      nApplied += f.predefinedFertiliserApplicationRateBasis === 'nitrogen' ? rate : rate * nPct / 100
+    } else if (f.amount != null) {
+      nApplied += (f.amount.value / area) * nPct / 100
+    }
+  }
+  return nApplied > 0 ? nApplied : null
+}
+
 export default function Assessments() {
   const [searchParams, setSearchParams] = useSearchParams()
   const farmId = searchParams.get('farmId') || null
@@ -115,6 +135,7 @@ export default function Assessments() {
                 <th>Status</th>
                 <th>Farm</th>
                 <th>Net CO₂eq</th>
+                <th>N Applied</th>
                 <th>Updated</th>
                 <th></th>
               </tr>
@@ -143,6 +164,17 @@ export default function Assessments() {
                     <td className={isPositive ? styles.balancePos : styles.balanceNeg}>
                       {fmtBalance(balance)}
                       {balance != null && <span className={styles.unit}> kg CO₂eq</span>}
+                    </td>
+                    <td>
+                      {(() => {
+                        const nApp = quickNBalance(run)
+                        if (nApp == null) return <span className={styles.date}>—</span>
+                        return (
+                          <span className={styles.nBal}>
+                            {nApp.toFixed(1)}<span className={styles.unit}> kg/ha</span>
+                          </span>
+                        )
+                      })()}
                     </td>
                     <td className={styles.date}>
                       {a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : '—'}

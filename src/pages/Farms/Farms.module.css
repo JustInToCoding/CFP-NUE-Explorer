@@ -97,7 +97,7 @@
 
 .table {
   width: 100%;
-  min-width: 860px;
+  min-width: 1100px;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
@@ -150,6 +150,17 @@
 .soilLoading {
   color: var(--color-text-muted);
   font-style: italic;
+}
+
+.efLabel {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  margin-top: 0.2rem;
+}
+
+.socValue {
+  font-variant-numeric: tabular-nums;
 }
 
 .clickableRow {

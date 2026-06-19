@@ -1,12 +1,11 @@
-const BASE = '/faostat'
+const BASE = 'https://faostatservices.fao.org/api/v1'
 
-// In-memory token cache
-let _token = null
-let _tokenExpiry = 0
+// In-memory JWT cache — keyed by username so stale tokens are dropped when credentials change
+let _cache = { username: null, token: null, expiry: 0 }
 
 const login = async () => {
-  const username = import.meta.env.VITE_FAOSTAT_USERNAME
-  const password = import.meta.env.VITE_FAOSTAT_PASSWORD
+  const username = localStorage.getItem('faostat_username') ?? ''
+  const password = localStorage.getItem('faostat_password') ?? ''
   if (!username || !password) return null
 
   const res = await fetch(`${BASE}/auth/login`, {
@@ -16,14 +15,16 @@ const login = async () => {
   })
   if (!res.ok) throw new Error(`FAOSTAT login failed: ${res.status} ${res.statusText}`)
   const data = await res.json()
-  _token = data.AuthenticationResult?.AccessToken ?? null
+  const token = data.AuthenticationResult?.AccessToken ?? null
   const expiresIn = data.AuthenticationResult?.ExpiresIn ?? 3600
-  _tokenExpiry = Date.now() + expiresIn * 1000
-  return _token
+  _cache = { username, token, expiry: Date.now() + expiresIn * 1000 }
+  return token
 }
 
 const getToken = async () => {
-  if (_token && Date.now() < _tokenExpiry - 60_000) return _token
+  const username = localStorage.getItem('faostat_username') ?? ''
+  if (_cache.token && _cache.username === username && Date.now() < _cache.expiry - 60_000)
+    return _cache.token
   return login()
 }
 

@@ -7,6 +7,7 @@ const links = [
   { to: '/farms', label: 'Farms' },
   { to: '/assessments', label: 'Assessments' },
   { to: '/global-n', label: 'Global N' },
+  { to: '/settings', label: 'Settings' },
 ]
 
 export default function NavBar() {

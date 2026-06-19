@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useAssessments } from '../../hooks/useAssessments'
 import { useFarm } from '../../hooks/useFarms'
 import Card from '../../components/Card/Card'
@@ -53,6 +53,7 @@ const quickNBalance = (run) => {
 }
 
 export default function Assessments() {
+  const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
   const farmId = searchParams.get('farmId') || null
 
@@ -137,7 +138,6 @@ export default function Assessments() {
                 <th>Net CO₂eq</th>
                 <th>N Applied</th>
                 <th>Updated</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -149,7 +149,11 @@ export default function Assessments() {
                 const isPositive = balance != null && balance >= 0
 
                 return (
-                  <tr key={a.id}>
+                  <tr
+                    key={a.id}
+                    className={styles.clickableRow}
+                    onClick={() => navigate(`/assessments/${a.id}`)}
+                  >
                     <td className={styles.name}>{a.name}</td>
                     <td className={styles.crop}>{crop ?? '—'}</td>
                     <td>
@@ -178,11 +182,6 @@ export default function Assessments() {
                     </td>
                     <td className={styles.date}>
                       {a.updatedAt ? new Date(a.updatedAt).toLocaleDateString() : '—'}
-                    </td>
-                    <td>
-                      <Link to={`/assessments/${a.id}`} className={styles.viewLink}>
-                        View →
-                      </Link>
                     </td>
                   </tr>
                 )

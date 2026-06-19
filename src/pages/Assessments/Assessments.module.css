@@ -119,7 +119,11 @@
   border-bottom: none;
 }
 
-.table tr:hover td {
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover td {
   background: var(--color-bg);
 }
 
@@ -159,16 +163,6 @@
   white-space: nowrap;
 }
 
-.viewLink {
-  font-size: 0.83rem;
-  font-weight: 500;
-  white-space: nowrap;
-  color: var(--color-primary);
-}
-
-.viewLink:hover {
-  text-decoration: underline;
-}
 
 .nBal {
   font-size: 0.85rem;

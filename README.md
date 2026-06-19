@@ -1,5 +1,14 @@
 # CFP NUE Explorer
 
+> **Built at FarmHack — IFA Hackathon 2026, Cork, Ireland**
+> This prototype was developed as a hackathon submission for the FarmHack IFA Hackathon 2026, held in Cork, Ireland. It addresses Challenge D — *NUE in the Wild* — and was conceived, designed, and built within the hackathon timeframe by the following team:
+>
+> | Name | Affiliation |
+> |---|---|
+> | Inder Kumar | Wageningen University & Research (WUR) |
+> | Emily Durrant | Cool Farm |
+> | Justin Steenhuis | Justintocoding |
+
 A research prototype built on the Cool Farm Platform API that transforms nitrogen-flow data into actionable insights. It visualises Nitrogen Use Efficiency (NUE), GHG emission intensity, farm-gate N balance, and benchmarks farms against national FAOSTAT data.
 
 ---

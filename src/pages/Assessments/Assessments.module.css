@@ -21,6 +21,40 @@
   margin-top: 0.2rem;
 }
 
+.total {
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.farmChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: color-mix(in srgb, var(--color-primary) 8%, var(--color-surface));
+  border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
+  border-radius: 2rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  width: fit-content;
+}
+
+.farmChipClear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--color-text-muted);
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.farmChipClear:hover {
+  color: var(--color-text);
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;
@@ -91,6 +125,32 @@
 
 .name {
   font-weight: 600;
+}
+
+.crop {
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.balancePos {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-error);
+  white-space: nowrap;
+}
+
+.balanceNeg {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-success);
+  white-space: nowrap;
+}
+
+.unit {
+  font-weight: 400;
+  color: var(--color-text-muted);
+  font-size: 0.78rem;
 }
 
 .date {

@@ -129,7 +129,7 @@
   border-bottom: none;
 }
 
-.nueRow td {
+.flagNRow td {
   background: var(--color-n2o-bg);
 }
 
@@ -146,6 +146,172 @@
 
 .dash {
   color: var(--color-text-muted);
+}
+
+.nueCard {
+  padding: 1.25rem 1.5rem;
+}
+
+.nueRow {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  margin: 1rem 0 0.75rem;
+  flex-wrap: wrap;
+}
+
+.nueMetric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.nueValue {
+  font-size: 2.8rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.nueLow    { color: #d93636; }
+.nueMid    { color: #d97706; }
+.nueHigh   { color: #16a34a; }
+.nueMining { color: #9333ea; }
+
+.nueLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+}
+
+.nueNote {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.nueStat {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.nueStatValue {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.nueStatLabel {
+  font-size: 0.78rem;
+  color: var(--color-text-muted);
+}
+
+.nueDesc {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  margin-top: 0.25rem;
+}
+
+.nueManualRow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 0.75rem 0 0.25rem;
+  padding: 0.75rem 1rem;
+  background: var(--color-bg);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius);
+}
+
+.nueManualLabel {
+  font-size: 0.82rem;
+  color: var(--color-text-muted);
+}
+
+.nueManualField {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.nueManualField input {
+  width: 5rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.3rem 0.5rem;
+  font-size: 0.9rem;
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.nueManualField input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+}
+
+.nueBenchmark {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem 0.75rem;
+  flex-wrap: wrap;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.nueBenchmarkLabel {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.nueBenchmarkValue {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.nueBenchmarkCountry {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+}
+
+.nueBenchmarkNote {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+  width: 100%;
+}
+
+.nueBenchmarkLoading {
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.nueWarnings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.nueAlert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  background: #f3eeff;
+  border: 1px solid #c4a6f0;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
 }
 
 .json {

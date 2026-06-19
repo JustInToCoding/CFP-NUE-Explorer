@@ -1,9 +1,17 @@
+import { mockRequest } from './mock'
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === 'true'
 const BASE = '/api'
 
 const request = async (method, path, body) => {
+  if (USE_MOCK) return mockRequest(method, path, body)
+
   const res = await fetch(`${BASE}${path}`, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `${import.meta.env.VITE_CFP_API_TOKEN}`,
+    },
     body: body !== undefined ? JSON.stringify(body) : undefined,
   })
 

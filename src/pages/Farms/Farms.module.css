@@ -97,6 +97,7 @@
 
 .table {
   width: 100%;
+  min-width: 860px;
   border-collapse: collapse;
   font-size: 0.875rem;
 }
@@ -135,4 +136,26 @@
   font-family: 'Courier New', monospace;
   font-size: 0.82rem;
   color: var(--color-text-muted);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.soilCell {
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.soilLoading {
+  color: var(--color-text-muted);
+  font-style: italic;
+}
+
+.clickableRow {
+  cursor: pointer;
+}
+
+.clickableRow:hover td {
+  background: color-mix(in srgb, var(--color-primary) 4%, var(--color-surface));
 }

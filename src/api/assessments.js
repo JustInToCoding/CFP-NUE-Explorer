@@ -5,4 +5,5 @@ export const listAssessments = (params = {}) => {
   return get(`/assessments${query ? `?${query}` : ''}`)
 }
 
-export const getAssessment = (id) => get(`/assessments/${id}`)
+export const getAssessment = (id) =>
+  get(`/assessment/${id}`).catch(() => get(`/assessments/${id}`))

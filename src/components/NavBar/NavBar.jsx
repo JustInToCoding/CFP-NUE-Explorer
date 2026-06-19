@@ -6,6 +6,7 @@ const links = [
   { to: '/soil', label: 'Soil Lookup' },
   { to: '/farms', label: 'Farms' },
   { to: '/assessments', label: 'Assessments' },
+  { to: '/global-n', label: 'Global N' },
 ]
 
 export default function NavBar() {

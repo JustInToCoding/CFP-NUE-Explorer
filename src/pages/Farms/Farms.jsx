@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useFarms, useCreateFarm } from '../../hooks/useFarms'
+import { useFarmSoil } from '../../hooks/useSoil'
 import Card from '../../components/Card/Card'
 import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner'
 import ErrorBanner from '../../components/ErrorBanner/ErrorBanner'
@@ -22,6 +24,38 @@ const EMPTY_FORM = {
   annualAverageTemperature: { value: 10, unit: '°C' },
 }
 
+function FarmRow({ farm }) {
+  const { data, isLoading } = useFarmSoil(farm)
+  const navigate = useNavigate()
+  return (
+    <tr
+      className={styles.clickableRow}
+      onClick={() => navigate(`/assessments?farmId=${farm.id}`)}
+      title="View assessments for this farm"
+    >
+      <td className={styles.farmName}>{farm.name}</td>
+      <td>{farm.country}</td>
+      <td><Badge variant="info">{farm.climate}</Badge></td>
+      <td className={styles.coords}>
+        {farm.latitude?.toFixed(2)}°, {farm.longitude?.toFixed(2)}°
+      </td>
+      <td>{farm.annualAverageTemperature?.value} {farm.annualAverageTemperature?.unit}</td>
+      <td className={styles.soilCell}>
+        {isLoading
+          ? <span className={styles.soilLoading}>…</span>
+          : data?.ipccSoilClass
+          ? <Badge variant="n2o">{data.ipccSoilClass}</Badge>
+          : '—'}
+      </td>
+      <td className={styles.soilCell}>
+        {isLoading
+          ? <span className={styles.soilLoading}>…</span>
+          : data?.wrbSoilClass ?? '—'}
+      </td>
+    </tr>
+  )
+}
+
 export default function Farms() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm] = useState(EMPTY_FORM)
@@ -42,7 +76,7 @@ export default function Farms() {
     setShowForm(false)
   }
 
-  const farmList = Array.isArray(data) ? data : data?.data ?? data?.items ?? []
+  const farmList = Array.isArray(data) ? data : data?.farms ?? data?.data ?? data?.items ?? []
 
   return (
     <div className={styles.page}>
@@ -166,35 +200,26 @@ export default function Farms() {
 
       {!isLoading && !isError && farmList.length > 0 && (
         <Card className={styles.tableCard}>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Country</th>
-                <th>Climate</th>
-                <th>Coordinates</th>
-                <th>Avg Temp</th>
-              </tr>
-            </thead>
-            <tbody>
-              {farmList.map((farm) => (
-                <tr key={farm.id}>
-                  <td className={styles.farmName}>{farm.name}</td>
-                  <td>{farm.country}</td>
-                  <td>
-                    <Badge variant="info">{farm.climate}</Badge>
-                  </td>
-                  <td className={styles.coords}>
-                    {farm.latitude?.toFixed(2)}°, {farm.longitude?.toFixed(2)}°
-                  </td>
-                  <td>
-                    {farm.annualAverageTemperature?.value}{' '}
-                    {farm.annualAverageTemperature?.unit}
-                  </td>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Country</th>
+                  <th>Climate</th>
+                  <th>Coordinates</th>
+                  <th>Avg Temp</th>
+                  <th>IPCC Soil Class</th>
+                  <th>WRB Soil Class</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {farmList.map((farm) => (
+                  <FarmRow key={farm.id} farm={farm} />
+                ))}
+              </tbody>
+            </table>
+          </div>
         </Card>
       )}
     </div>

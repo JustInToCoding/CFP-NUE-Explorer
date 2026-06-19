@@ -5,6 +5,7 @@ import SoilLookup from './pages/SoilLookup/SoilLookup'
 import Farms from './pages/Farms/Farms'
 import Assessments from './pages/Assessments/Assessments'
 import AssessmentDetail from './pages/AssessmentDetail/AssessmentDetail'
+import GlobalNContext from './pages/GlobalNContext/GlobalNContext'
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Route path="farms" element={<Farms />} />
           <Route path="assessments" element={<Assessments />} />
           <Route path="assessments/:id" element={<AssessmentDetail />} />
+          <Route path="global-n" element={<GlobalNContext />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

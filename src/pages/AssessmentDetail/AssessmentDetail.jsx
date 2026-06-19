@@ -1,5 +1,7 @@
+import { useMemo, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useAssessment } from '../../hooks/useAssessments'
+import { useFaostatCodes, useFaostatData } from '../../hooks/useFaostat'
 import Card from '../../components/Card/Card'
 import LoadingSpinner from '../../components/LoadingSpinner/LoadingSpinner'
 import ErrorBanner from '../../components/ErrorBanner/ErrorBanner'
@@ -8,13 +10,152 @@ import EmptyState from '../../components/EmptyState/EmptyState'
 import styles from './AssessmentDetail.module.css'
 
 const fmt = (n) => (n != null ? Number(n).toFixed(3) : '—')
+const fmtN = (n) => (n != null ? n.toFixed(1) : '—')
 
 const isNitrogenRelated = (category) =>
   category?.includes('Non-land') || category?.includes('Land management')
 
+// kg N per kg dry matter for harvested fraction. Source: IPCC 2006 Guidelines Table 11.2.
+const CROP_N_CONTENT = {
+  // Cereals
+  wheat: 0.020, 'winter wheat': 0.020, 'spring wheat': 0.020,
+  barley: 0.017, 'winter barley': 0.017, 'spring barley': 0.017,
+  maize: 0.013, corn: 0.013,
+  rice: 0.012,
+  oat: 0.017, oats: 0.017,
+  rye: 0.017,
+  sorghum: 0.013,
+  millet: 0.013,
+  triticale: 0.018,
+  teff: 0.020,
+  // Oilseeds
+  rapeseed: 0.035, canola: 0.035,
+  sunflower: 0.025,
+  soybean: 0.063, soya: 0.063, soybeans: 0.063,
+  groundnut: 0.045, peanut: 0.045, peanuts: 0.045,
+  linseed: 0.030, flaxseed: 0.030,
+  cotton: 0.034,
+  // Legumes
+  pea: 0.040, peas: 0.040,
+  bean: 0.044, beans: 0.044,
+  'fava bean': 0.044, 'fava beans': 0.044, 'field bean': 0.044,
+  chickpea: 0.040, lentil: 0.040, lentils: 0.040,
+  alfalfa: 0.027, clover: 0.024, lucerne: 0.027,
+  // Root crops & tubers
+  potato: 0.003, potatoes: 0.003,
+  'sweet potato': 0.003,
+  cassava: 0.003,
+  // Sugar crops
+  'sugar beet': 0.002,
+  sugarcane: 0.001, 'sugar cane': 0.001,
+  // Other
+  tobacco: 0.038,
+  coffee: 0.020,
+}
+
+// FAOSTAT helpers — find a code by label keyword, match farm country to FAOSTAT country list
+const findFaoCode = (items = [], ...keywords) =>
+  items.find(c => keywords.some(kw => c.label?.toLowerCase().includes(kw.toLowerCase())))
+
+const normStr = s => s.toLowerCase().replace(/[^a-z\s]/g, '').trim()
+
+const matchFaoCountry = (farmCountry, countries) => {
+  if (!farmCountry || !countries?.length) return null
+  const fn = normStr(farmCountry)
+  let c = countries.find(x => normStr(x.label) === fn)
+  if (c) return c
+  c = countries.find(x => fn.includes(normStr(x.label)) || normStr(x.label).includes(fn))
+  if (c) return c
+  const farmWords = new Set(fn.split(/\s+/).filter(w => w.length > 3))
+  let best = null, bestScore = 0
+  for (const x of countries) {
+    const score = normStr(x.label).split(/\s+/).filter(w => w.length > 3 && farmWords.has(w)).length
+    if (score > bestScore) { bestScore = score; best = x }
+  }
+  return bestScore > 0 ? best : null
+}
+
+const parseFaoPoints = (res) =>
+  (res?.data ?? [])
+    .filter(r => r.Value && !isNaN(parseFloat(r.Value)))
+    .map(r => ({ year: parseInt(r.Year, 10), value: parseFloat(r.Value) }))
+    .sort((a, b) => a.year - b.year)
+
+const parseNPct = (typeStr) => {
+  const m = typeStr?.match(/(\d+\.?\d*)\s*%\s*N/i)
+  return m ? parseFloat(m[1]) : null
+}
+
+const calcNUE = (run, manualCropNPct = null) => {
+  if (!run?.inputData) return null
+
+  const fertilisers = run.inputData.fertiliser?.fertilisers ?? []
+  const area = run.inputData.cropDetails?.area?.value
+  const yieldVal = run.inputData.cropDetails?.farmGate?.value
+                ?? run.inputData.cropDetails?.cropYield?.value
+  const yieldUnit = run.inputData.cropDetails?.farmGate?.unit
+                 ?? run.inputData.cropDetails?.cropYield?.unit ?? ''
+  const cropType = (
+    run.runMetadata?.subCategory ?? run.inputData.cropDetails?.cropType ?? ''
+  ).toLowerCase()
+
+  if (!area || !fertilisers.length) return null
+
+  let nAppliedPerHa = 0
+  for (const f of fertilisers) {
+    // real API: predefinedApplicationRate (kg/ha), predefinedFertiliserType has "X% N"
+    // mock: amount (total kg), nitrogenPercentage
+    const nPct = f.nitrogenPercentage ?? parseNPct(f.predefinedFertiliserType ?? f.type)
+    if (nPct == null) continue
+    if (f.predefinedApplicationRate != null) {
+      const ratePerHa = f.predefinedApplicationRate.value ?? 0
+      const isNBasis = f.predefinedFertiliserApplicationRateBasis === 'nitrogen'
+      nAppliedPerHa += isNBasis ? ratePerHa : ratePerHa * nPct / 100
+    } else if (f.amount != null) {
+      nAppliedPerHa += (f.amount.value / area) * nPct / 100
+    }
+  }
+
+  const cropKey = Object.keys(CROP_N_CONTENT).find((k) => cropType.includes(k))
+  const cropNContent = cropKey
+    ? CROP_N_CONTENT[cropKey]
+    : manualCropNPct != null ? manualCropNPct / 100 : null
+
+  let nRemovedPerHa = null
+  if (cropNContent != null && yieldVal != null) {
+    const yieldKgPerHa = (yieldUnit.toLowerCase().includes('tonne') ? yieldVal * 1000 : yieldVal) / area
+    nRemovedPerHa = yieldKgPerHa * cropNContent
+  }
+
+  const nue = nAppliedPerHa > 0 && nRemovedPerHa != null
+    ? (nRemovedPerHa / nAppliedPerHa) * 100
+    : null
+
+  return { nAppliedPerHa, nRemovedPerHa, nue, cropKey, cropType, usingManual: !cropKey && manualCropNPct != null }
+}
+
 export default function AssessmentDetail() {
   const { id } = useParams()
   const { data: assessment, isLoading, isError, error } = useAssessment(id)
+
+  // FAOSTAT national NUE benchmark — hooks must be unconditional, data query enabled once codes + country resolve
+  const esbEl   = useFaostatCodes('ESB', 'elements')
+  const esbIt   = useFaostatCodes('ESB', 'items')
+  const esbCtry = useFaostatCodes('ESB', 'countries')
+
+  const farmCountry = assessment?.farm?.country
+  const nueElCode  = useMemo(() => findFaoCode(esbEl.data?.data, 'efficiency', 'nue'),        [esbEl.data])
+  const esbNItCode = useMemo(() => findFaoCode(esbIt.data?.data, 'nitrogen (n)', 'nitrogen'), [esbIt.data])
+  const ctryMatch  = useMemo(() => matchFaoCountry(farmCountry, esbCtry.data?.data),          [farmCountry, esbCtry.data])
+
+  const ctryNueQ     = useFaostatData('ESB',
+    { area: ctryMatch?.code, element: nueElCode?.code, item: esbNItCode?.code },
+    { enabled: !!ctryMatch && !!nueElCode && !!esbNItCode }
+  )
+  const ctryNuePoints  = useMemo(() => parseFaoPoints(ctryNueQ.data), [ctryNueQ.data])
+  const latestCtryNUE  = ctryNuePoints[ctryNuePoints.length - 1]
+
+  const [manualCropNPct, setManualCropNPct] = useState(null)
 
   if (isLoading) return <LoadingSpinner label="Loading assessment..." />
 
@@ -34,9 +175,23 @@ export default function AssessmentDetail() {
   const run = assessment.submittedRun ?? assessment.draftRun
   const summary = run?.resultSummary
   const flagData =
-    run?.resultDisaggregated?.resultsByFlag ??
+    run?.resultAggregations?.assessmentYearGhgsByFlagCategory?.data ??
     run?.resultAggregations?.byFlag ??
+    run?.resultDisaggregated?.resultsByFlag ??
     []
+
+  const nueWarnings = (run?.inputDataValidationReport?.modelInput?.fertiliser ?? [])
+    .filter((w) => w.message?.toLowerCase().includes('nitrogen use efficiency') || w.message?.toLowerCase().includes('nue'))
+
+  const nueCalc = calcNUE(run, manualCropNPct)
+  const nue = nueCalc?.nue
+  const nueMining = nue != null && nue > 90
+  const nueClass = nue == null
+    ? ''
+    : nue < 50  ? styles.nueLow
+    : nue < 70  ? styles.nueMid
+    : nue <= 90 ? styles.nueHigh
+    : styles.nueMining
 
   return (
     <div className={styles.page}>
@@ -83,6 +238,93 @@ export default function AssessmentDetail() {
         </div>
       )}
 
+      {nueCalc && (
+        <Card className={styles.nueCard}>
+          <h2 className={styles.sectionTitle}>Nitrogen Use Efficiency</h2>
+          <div className={styles.nueRow}>
+            <div className={styles.nueMetric}>
+              <span className={`${styles.nueValue} ${nueClass}`}>
+                {nue != null ? `${nue.toFixed(1)}%` : '—'}
+              </span>
+              <span className={styles.nueLabel}>NUE</span>
+              {nueMining && (
+                <span className={styles.nueNote}>soil N mining risk</span>
+              )}
+            </div>
+            <div className={styles.nueStat}>
+              <span className={styles.nueStatValue}>{fmtN(nueCalc.nAppliedPerHa)}</span>
+              <span className={styles.nueStatLabel}>kg N / ha applied</span>
+            </div>
+            {nueCalc.nRemovedPerHa != null && (
+              <div className={styles.nueStat}>
+                <span className={styles.nueStatValue}>{fmtN(nueCalc.nRemovedPerHa)}</span>
+                <span className={styles.nueStatLabel}>kg N / ha removed (est.)</span>
+              </div>
+            )}
+          </div>
+          {!nueCalc.cropKey && (
+            <div className={styles.nueManualRow}>
+              <label className={styles.nueManualLabel} htmlFor="crop-n-pct">
+                {nueCalc.cropType
+                  ? <><strong>"{nueCalc.cropType}"</strong> not in lookup table —</>
+                  : 'Unknown crop —'
+                }
+                {' '}enter N content to estimate NUE:
+              </label>
+              <div className={styles.nueManualField}>
+                <input
+                  id="crop-n-pct"
+                  type="number"
+                  min="0.1"
+                  max="15"
+                  step="0.1"
+                  placeholder="e.g. 2.0"
+                  value={manualCropNPct ?? ''}
+                  onChange={e => setManualCropNPct(e.target.value ? parseFloat(e.target.value) : null)}
+                />
+                <span>% N in harvested dry matter</span>
+              </div>
+            </div>
+          )}
+
+          <p className={styles.nueDesc}>
+            NUE = N removed in harvest ÷ N applied (synthetic fertilisers only). Optimal range: 70–80%. Below 50% = N surplus risk. Above 90% = soil N mining risk.
+            {nueCalc.cropKey
+              ? ` Crop N content for ${nueCalc.cropKey}: ${(CROP_N_CONTENT[nueCalc.cropKey] * 100).toFixed(1)}% N (IPCC 2006 Table 11.2).`
+              : nueCalc.usingManual
+              ? ` Using manually entered crop N content of ${manualCropNPct.toFixed(1)}%.`
+              : ''}
+            {nueMining && ' NUE > 90% indicates the crop may be drawing on soil N reserves beyond applied fertiliser.'}
+          </p>
+
+          {farmCountry && (ctryNueQ.isLoading || latestCtryNUE) && (
+            <div className={styles.nueBenchmark}>
+              {ctryNueQ.isLoading ? (
+                <span className={styles.nueBenchmarkLoading}>Loading national NUE…</span>
+              ) : (
+                <>
+                  <span className={styles.nueBenchmarkLabel}>National cropland NUE</span>
+                  <span className={styles.nueBenchmarkValue}>{latestCtryNUE.value.toFixed(1)}%</span>
+                  <span className={styles.nueBenchmarkCountry}>{ctryMatch.label}, {latestCtryNUE.year} · FAOSTAT ESB</span>
+                  <span className={styles.nueBenchmarkNote}>Full N budget (fertiliser + manure + deposition + fixation) — broader than farm calc above</span>
+                </>
+              )}
+            </div>
+          )}
+        </Card>
+      )}
+
+      {nueWarnings.length > 0 && (
+        <div className={styles.nueWarnings}>
+          {nueWarnings.map((w, i) => (
+            <div key={i} className={styles.nueAlert}>
+              <Badge variant="n2o">NUE</Badge>
+              <span>{w.message}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
       <Card>
         <h2 className={styles.sectionTitle}>N₂O Emissions by FLAG Category</h2>
         <p className={styles.sectionDesc}>
@@ -114,7 +356,7 @@ export default function AssessmentDetail() {
                 {flagData.map((row, i) => (
                   <tr
                     key={i}
-                    className={isNitrogenRelated(row.flagCategory) ? styles.nueRow : ''}
+                    className={isNitrogenRelated(row.flagCategory) ? styles.flagNRow : ''}
                   >
                     <td className={styles.flagCategory}>{row.flagCategory}</td>
                     <td className={styles.n2o}>{fmt(row.N2O)}</td>

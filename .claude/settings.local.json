@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.fao.org)",
+      "WebFetch(domain:faostatapi.fao.org)",
+      "WebFetch(domain:fenixservices.fao.org)",
+      "WebSearch"
+    ]
+  }
+}
